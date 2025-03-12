@@ -54,7 +54,6 @@ plt.xlabel("tiempo [segundos]")
 plt.ylabel("Amplitud")
 plt.legend()
 plt.show()
-plt.grid 
 
 #Distintas simulaciónes variando f0
 f0 = 1 #tiempo (Hz)  
