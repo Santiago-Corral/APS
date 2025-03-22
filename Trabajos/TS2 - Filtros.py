@@ -34,9 +34,17 @@ BW=w0/Q
 system = sig.TransferFunction(num, den)
 
 # Definir el rango de frecuencias para el análisis
-w = np.logspace(-1, 5, 1000) # Frecuencia de 10^-1 a 10^5 rad/s #!! De cambiar los valores de RLC hay que prestar atencion al rango de frecuencias
+w = np.logspace(-1, 4, 1000) # Frecuencia de 10^-1 a 10^5 rad/s #!! De cambiar los valores de RLC hay que prestar atencion al rango de frecuencias
 # Obtener la respuesta en frecuencia
 w, mag, phase = sig.bode(system, w)
+
+# EQ. asintota de altas frecuencia
+asintota_alta = -20 * np.log10(w) + 20 * np.log10(R / L)
+fase_asintota_alta = 90   # Fase en alta frecuencia
+
+# EQ. asintota bajas frecuencia 
+asintota_baja = 20 * np.log10(w) 
+fase_asintota_baja = -90  # Fase en baja frecuencia
 
 # Graficar la respuesta en magnitud
 plt.figure(figsize=(10, 6))
@@ -52,25 +60,24 @@ plt.vlines(w0, ymin=np.interp(w0, w, mag) - 5, ymax=np.interp(w0, w, mag) + 5, c
 #Ancho de banda
 plt.vlines([w0 - BW/2, w0 + BW/2], ymin=np.min(mag)-10, ymax=np.max(mag)+10, color='g', linestyle='--', label="Ancho de Banda (BW)")
 
-plt.axhline(-20, color='r', linestyle='--', label="Asíntota baja frecuencia (-20 dB/dec)")
-plt.axhline(0, color='g', linestyle='--', label="Asíntota alta frecuencia (0 dB)")
+plt.plot(w, asintota_alta, color='r', linestyle='dotted', alpha = 0.5, label="Asíntota alta frecuencia (-20 dB/dec)")
+plt.plot(w, asintota_baja, color=(0.8500, 0.3250, 0.0980), linestyle='dotted', alpha = 0.5, label="Asíntota baja frecuencia (20 dB/dec)")
 plt.ylabel("Magnitud (dB)")
+plt.ylim(-50,50)
 plt.legend()
 plt.grid(True, which="both", linestyle="--")
 
 # Graficar la respuesta en fase
 plt.subplot(2, 1, 2)
 plt.semilogx(w, phase, label="Fase ∠H(jω) (°)")
-plt.axhline(90, color='r', linestyle='--', label="Asíntota alta frecuencia (90°)")
-plt.axhline(0, color='g', linestyle='--', label="Asíntota baja frecuencia (0°)")
+plt.axhline(fase_asintota_alta, color='r', linestyle='--', alpha = 0.5, label="Asíntota alta frecuencia (90°)")
+plt.axhline(fase_asintota_baja, color=(0.8500, 0.3250, 0.0980), linestyle='--', alpha = 0.5, label="Asíntota baja frecuencia (-90°)")
 plt.ylabel("Fase (°)")
 plt.xlabel("Frecuencia (rad/s)")
 plt.legend()
 plt.grid(True, which="both", linestyle="--")
 
 plt.show()
-
-
 
 #%% Funcion 2
 
@@ -86,10 +93,18 @@ BW=w0/Q
 system = sig.TransferFunction(num, den)
 
 # Definir el rango de frecuencias para el análisis
-w = np.logspace(-1, 5, 1000)  # Frecuencia de 10^-1 a 10^5 rad/s
+w = np.logspace(-1, 4, 1000)  # Frecuencia de 10^-1 a 10^5 rad/s
 
 # Obtener la respuesta en frecuencia
 w, mag, phase = sig.bode(system, w)
+
+# EQ. asintota de altas frecuencia
+asintota_alta = 20 * np.log10(R / L) * w
+fase_asintota_alta = 180   # Fase en alta frecuencia
+
+# EQ. asintota bajas frecuencia 
+asintota_baja = 40 * np.log10(1 / (R * C) * w) 
+fase_asintota_baja = 0  # Fase en baja frecuencia
 
 # Graficar la respuesta en magnitud
 plt.figure(figsize=(10, 6))
@@ -104,18 +119,18 @@ plt.vlines(w0, ymin=np.interp(w0, w, mag) - 5, ymax=np.interp(w0, w, mag) + 5, c
 
 #Ancho de banda
 plt.vlines([w0 - BW/2, w0 + BW/2], ymin=np.min(mag)-10, ymax=np.max(mag)+10, color='g', linestyle='--', label="Ancho de Banda (BW)")
-
-plt.axhline(-20, color='r', linestyle='--', label="Asíntota baja frecuencia (-20 dB/dec)")
-plt.axhline(0, color='g', linestyle='--', label="Asíntota alta frecuencia (0 dB)")
+plt.plot(w, asintota_alta, color='r', linestyle='dotted', alpha = 0.5, label="Asíntota alta frecuencia (0 dB/dec)")
+plt.plot(w, asintota_baja, color=(0.8500, 0.3250, 0.0980), linestyle='dotted', alpha = 0.5, label="Asíntota baja frecuencia (20 dB/dec)")
 plt.ylabel("Magnitud (dB)")
+plt.ylim(-50,100)
 plt.legend()
 plt.grid(True, which="both", linestyle="--")
 
 # Graficar la respuesta en fase
 plt.subplot(2, 1, 2)
 plt.semilogx(w, phase, label="Fase ∠H(jω) (°)")
-plt.axhline(90, color='r', linestyle='--', label="Asíntota alta frecuencia (90°)")
-plt.axhline(0, color='g', linestyle='--', label="Asíntota baja frecuencia (0°)")
+plt.axhline(fase_asintota_alta, color='r', linestyle='--', alpha = 0.5, label="Asíntota alta frecuencia (0°)")
+plt.axhline(fase_asintota_baja, color=(0.8500, 0.3250, 0.0980), linestyle='--', alpha = 0.5, label="Asíntota baja frecuencia (180°)")
 plt.ylabel("Fase (°)")
 plt.xlabel("Frecuencia (rad/s)")
 plt.legend()
