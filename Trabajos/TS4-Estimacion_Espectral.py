@@ -9,7 +9,7 @@ import pandas as pd
 R = 200 #Realizaciones
 N = 1000 # cantidad de muestras
 fs =  1000 # frecuencia de muestreo (Hz)
-SNR = 10 #dB, piso de ruido
+SNR = 3 #dB, piso de ruido
 
 #%%
 
@@ -27,7 +27,6 @@ fr = np.reshape(fr, (1,R))
 
 omega_0 = fs/4 #Mitad de banda digital
 omega_1 = omega_0 +  fr * df #como luego lo usamos para el sesgo, multiplicamos por 2pi dentro del seno
-
 
 a1 = np.sqrt(2)
 xx = a1 * np.sin(2*np.pi*omega_1*tt) 
@@ -153,16 +152,17 @@ varianza_o_sinc = np.var(est_omega_sinc)
 varianza_o_blackman = np.var(est_omega_blackman)
 varianza_o_flattop = np.var(est_omega_flattop)
 varianza_o_lanczos = np.var(est_omega_lanczos)
+
 #%% Tabla de resultados
- #Importe una libreria llamada pandas la cual resulta muy util para este tipo de tablas
+#Importe una libreria llamada pandas la cual resulta muy util para este tipo de tablas
 
 # Crear la tabla con tus valores (reemplazá con tus propios datos si es necesario)
 tabla_resultados = pd.DataFrame({
     "Ventana": ["Sinc", "Blackman", "Flattop", "Lanczos"],
-    "Sesgo A1": [sesgo_a_sinc, sesgo_a_blackman, sesgo_a_flattop, sesgo_a_lanczos],
-    "Varianza A1": [varianza_a_sinc, varianza_a_blackman, varianza_a_flattop, varianza_a_lanczos],
+    "Sesgo A1": [round(sesgo_a_sinc, 3), round(sesgo_a_blackman, 3), round(sesgo_a_flattop, 3), round(sesgo_a_lanczos, 3)],
+    "Varianza A1": [round(varianza_a_sinc, 3), round(varianza_a_blackman, 3), round(varianza_a_flattop, 3), round(varianza_a_lanczos, 3)],
     "Sesgo Ω1": [sesgo_o_sinc, sesgo_o_blackman, sesgo_o_flattop, sesgo_o_lanczos],
-    "Varianza Ω1": [varianza_o_sinc, varianza_o_blackman, varianza_o_flattop, varianza_o_lanczos]
+    "Varianza Ω1": [round(varianza_o_sinc, 3), round(varianza_o_blackman, 3), round(varianza_o_flattop, 3), round(varianza_o_lanczos, 3)]
 })
 
 # Redondear para mejorar la estética
@@ -224,11 +224,10 @@ plt.title(f"Histograma de estimadores de frecuencias con SNR = {SNR} dB // ZERO 
 ## Sesgo y varianza de los estimadores de frecuencia espectral
 
 ## Sesgo y varianza de los estimadores de frecuencia espectral
-
 esperanza_o_sinc = np.mean(est_omega_sinc_zp)
 esperanza_o_blackman = np.mean(est_omega_blackman_zp)
 esperanza_o_flattop = np.mean(est_omega_flattop_zp)
-esperanza_o_lanczos = np.mean(est_omega_lanczos_zp)
+jjesperanza_o_lanczos = np.mean(est_omega_lanczos_zp)
 
 sesgo_o_sinc = esperanza_o_sinc - omega_0 #siendo omega_1 el valor real, no el estimado
 sesgo_o_blackman = esperanza_o_blackman - omega_0
@@ -247,7 +246,7 @@ varianza_o_lanczos = np.var(est_omega_lanczos_zp)
 tabla_resultados = pd.DataFrame({
     "Ventana": ["Sinc", "Blackman", "Flattop", "Lanczos"],
     "Sesgo Ω1": [sesgo_o_sinc, sesgo_o_blackman, sesgo_o_flattop, sesgo_o_lanczos],
-    "Varianza Ω1": [varianza_o_sinc, varianza_o_blackman, varianza_o_flattop, varianza_o_lanczos]
+    "Varianza Ω1": [round(varianza_o_sinc, 3), round(varianza_o_blackman, 3), round(varianza_o_flattop, 3), round(varianza_o_lanczos, 3)]
 })
 
 # Redondear para mejorar la estética

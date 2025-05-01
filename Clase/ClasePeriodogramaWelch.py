@@ -102,10 +102,8 @@ ss = xx+nn #Señal mas ruido
 
 (ff,a2) = sp.signal.welch(ss,fs = fs,window="flattop",nperseg = N/128, axis = 0) #Implementa el metodo de Welch, con sus promedios
 
-
 ## El tener mas promedios (aumentar N en welch, largo de segmentos) disminuimos aun mas la varianza
 ## Pero sacrificamos resolución espectral, ya que nos quedamos con menos muestras?
-
 
 bfrec = ff <= fs/2
 plt.plot(ff[bfrec], 10* np.log10(2*np.abs(a2[bfrec])**2)) 
