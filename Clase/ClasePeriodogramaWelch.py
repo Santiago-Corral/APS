@@ -1,6 +1,5 @@
 #%% El Welch esta bien aplicado, hay que ver el blackman tukey
 
-
 #%% módulos y funciones a importar
 import numpy as np
 import scipy as sp
