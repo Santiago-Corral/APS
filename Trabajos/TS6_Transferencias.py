@@ -1,5 +1,4 @@
 import numpy as np
-from scipy import signal as sig
 import matplotlib.pyplot as plt
 
 #%%
@@ -75,4 +74,9 @@ Denominadores_d = [1, 0, 0]
 Analisis_Frecuencial(H_a, Numeradores_a, Denominadores_a)
 Analisis_Frecuencial(H_b, Numeradores_b, Denominadores_b)
 Analisis_Frecuencial(H_c, Numeradores_c, Denominadores_c)
+Analisis_Frecuencial(H_d, Numeradores_d, Denominadores_d)
+
+H_d = 1/4 * np.exp(-3j*omega) * ((np.exp(3j*omega)) + (np.exp(2j*omega)) + (np.exp(1j*omega)) + 1)
+Numeradores_d = [1/4, 1/4 , 1/4, 1/4]
+Denominadores_d = [0, 0, 0, 1]
 Analisis_Frecuencial(H_d, Numeradores_d, Denominadores_d)

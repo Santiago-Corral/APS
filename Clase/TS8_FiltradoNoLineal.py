@@ -127,6 +127,9 @@ plt.show()
 
 #%% Detección de picos
 
+#%% Detección de picos
+fs = 1000
+
 qrs = mat_struct['qrs_pattern1'] / np.std(mat_struct['qrs_pattern1'])
 
 # Correlación como filtro adaptado
@@ -135,17 +138,8 @@ correlatedECG = correlatedECG / np.std(correlatedECG)
 
 peaks_true = mat_struct['qrs_detections'].flatten()
 
-# Visualización de la correlación
-plt.figure()
-plt.plot(ecg_one_lead, label="ECG")
-plt.plot(peaks_true, ecg_one_lead[peaks_true], 'rx', label = 'picos reales')
-plt.plot(correlatedECG, label="ECG - Correlado")
-plt.title("ECG Correlado (Filtro Adaptado)")
-plt.grid()
-plt.legend()
-
 # Detección de picos
-peaks, _ = sig.find_peaks(correlatedECG, prominence=1.8)
+peaks, _ = sig.find_peaks(correlatedECG, prominence = 1.8)
 
 # Visualización de los picos detectados
 plt.figure()
@@ -153,60 +147,100 @@ plt.plot(peaks, ecg_one_lead[peaks], 'rx', label="Picos")
 plt.plot(peaks_true, ecg_one_lead[peaks_true], 'yx', label="Picos Reales")
 plt.plot(ecg_one_lead, label="ECG - Correlado")
 plt.title("Detección de picos con filtro adaptado")
+plt.xlim(700000 , 745000)
 plt.grid()
 plt.legend()
 
-# Comparación con detecciones reales
-qrs_ref = mat_struct['qrs_detections'].flatten()
-tolerancia = 100
+# Visualización de los picos detectados
+plt.figure()
+plt.plot(peaks, ecg_one_lead[peaks], 'rx', label="Picos")
+plt.plot(peaks_true, ecg_one_lead[peaks_true], 'yx', label="Picos Reales")
+plt.plot(ecg_one_lead, label="ECG - Correlado")
+plt.title("Detección de picos con filtro adaptado")
+plt.xlim(700000 , 705000)
+plt.grid()
+plt.legend()
+
+# Visualización de los picos detectados
+plt.figure()
+plt.plot(peaks, ecg_one_lead[peaks], 'rx', label="Picos")
+plt.plot(peaks_true, ecg_one_lead[peaks_true], 'yx', label="Picos Reales")
+plt.plot(ecg_one_lead, label="ECG - Correlado")
+plt.title("Detección de picos con filtro adaptado")
+plt.xlim( 32500 , 40000)
+plt.grid()
+plt.legend()
+
+
+# Comparación con detecciones reales dentro de un rango específico
+inicio = 700000
+fin = 745000
+tolerancia = 150
 TP = 0
 
-comparaciones = min(len(peaks), len(qrs_ref)) #Cantidad de comparaciones
-indices = np.arange(comparaciones) #Genero un vector para recorrer los indices
+# Filtrar picos detectados y reales dentro del rango
+peaks_region = peaks[(peaks >= inicio) & (peaks <= fin)]
+qrs_ref_region = peaks_true[(peaks_true >= inicio) & (peaks_true <= fin)]
+comparaciones = min(len(peaks_region), len(qrs_ref_region))
+indices = np.arange(comparaciones)
 
 for i in indices:
-    if abs(peaks[i] - qrs_ref[i]) <= tolerancia:
+    if abs(peaks_region[i] - qrs_ref_region[i]) <= tolerancia:
         TP += 1
 
-FN = len(qrs_ref) - TP
-FP = len(peaks) - TP
+FN = len(qrs_ref_region) - TP
+FP = len(peaks_region) - TP
 
-Se = TP / (TP + FN)
-PPV = TP / (TP + FP)
+Se = TP / (TP + FN) if (TP + FN) > 0 else 0
+PPV = TP / (TP + FP) if (TP + FP) > 0 else 0
 
 print(f"Sensibilidad (Se): {Se:.3f}")
 print(f"Valor predictivo positivo (PPV): {PPV:.3f}")
-print(f"Sensibilidad (Se): {TP:.3f}")
+print(f"Cantidad de detecciónes verdaderas: {TP}")
+print(f"Cantidad de picos reales en la región: {len(qrs_ref_region)}")
+print(f"Cantidad de picos detectados en la región: {len(peaks_region)}")
 
 #%%
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy import signal as sig
-import scipy.io as sio
+qrs = mat_struct['qrs_pattern1'] / np.std(mat_struct['qrs_pattern1'])
 
-# Cargar señal y patrón
-mat_struct = sio.loadmat('ECG_TP4.mat')
-ecg = mat_struct['ecg_lead'].flatten()
-pattern = mat_struct['qrs_pattern1'].flatten()
-qrs_ref = mat_struct['qrs_detections'].flatten()
+# Segmento de ECG
+ecg_segment = ecg_one_lead[300000:312000]
 
-# Normalizar
-ecg = ecg / np.std(ecg)
-pattern = pattern / np.std(pattern)
+# Invierto el patrón del filtro adaptado
+h = qrs_pattern1[::-1]
 
-# Filtro adaptado = correlación con el patrón
-matched_output = np.correlate(ecg, pattern, mode='same')
-matched_output = matched_output / np.std(matched_output)
+# Correlación en modo 'same' para que tenga el mismo largo que ecg_segment
+correlation = correlate(ecg_segment, h, mode='same')
 
-# Detección de picos en la señal filtrada
-peaks, _ = sig.find_peaks(matched_output, distance=150, prominence=1.0)
+# Detección de picos en la correlación
+peaks, _ = find_peaks(correlation, height=np.max(correlation)*0.3, distance=int(fs*0.6))
 
-# Visualización
-plt.figure(figsize=(12, 4))
-plt.plot(ecg, label='ECG')
-plt.plot(matched_output, label='Filtro adaptado')
-plt.plot(peaks, matched_output[peaks], 'rx', label='Detecciones')
-plt.legend()
-plt.title('Detección con filtro adaptado')
-plt.grid()
+# Picos verdaderos dentro del segmento (convertidos a relativo al segmento)
+peaks_true = qrs_detections[(qrs_detections >= 300000) & (qrs_detections < 312000)] - 300000
+
+
+# Visualizacion 
+fig, axs = plt.subplots(2, 1, figsize=(12, 8))
+
+axs[0].plot(ecg_segment, label='ECG')
+axs[0].plot(peaks_true, ecg_segment[peaks_true], 'go', label='Latidos reales')
+axs[0].plot(peaks, ecg_segment[peaks], 'rx', label='Latidos detectados')
+axs[0].set_title('Señal ECG (latidos reales)')
+axs[0].set_xlabel('Muestras')
+axs[0].set_ylabel('Amplitud')
+axs[0].grid(True)
+axs[0].legend()
+
+# Correlación con detección de picos
+axs[1].plot(correlation, label='Correlación (matched filter)')
+axs[1].plot(peaks_true, correlation[peaks_true], 'go', label='Latidos reales')
+axs[1].plot(peaks, correlation[peaks], 'ro', label='Latidos detectados')
+axs[1].set_title('Filtro Adaptado - Correlación y Detecciones')
+axs[1].set_xlabel('Muestras')
+axs[1].set_ylabel('Amplitud')
+axs[1].grid(True)
+axs[1].legend()
+
+plt.tight_layout()
 plt.show()
+
